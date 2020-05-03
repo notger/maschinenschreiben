@@ -20,7 +20,8 @@ class Dictionary(object):
         # Create a letter to numbers and numbers to letters lookup for later use, e.g. embedding-conversion:
         self.letter_embedding_lookup = self.create_letter_embedding_lookup(curriculum[-1])
 
-        # Create the one-hot-encoded representation:
+        # Create the one-hot-encoded representation, if it does not already exist:
+        # Check for file existence, then load, otherwise generate and save.
         #self.embeddings = self.create_embedding(self.dic, self.eligible_letters_per_level[-1])
 
     @staticmethod
@@ -48,12 +49,18 @@ class Dictionary(object):
         # Create a second version of the dictionary with "embeddings". Each letter has one column
         # in a one-hot-encoding-matrix of dim N x M, where N is the number of words in the original
         # dictionary and M is the number of max allowed letters in the highest level:
-        embeddings = np.zeros((len(dic), len(set_of_letters)))
+        embeddings = np.zeros((len(dic), len(set_of_letters)), dtype=int)
 
-        # Todo
+        for k, word in enumerate(dic):
+            ordered_letters = sorted(list(set(word)))
+            # Create the list of indices from the word. If the word contains letters not allowed,
+            # e.g. letters outside of the allowed alphabed, then discard it.
+            indices = [number_letter_lookup[a] for a in ordered_letters if number_letter_lookup.get(a, -1) >= 0]
+            embeddings[k, indices] = 1
+
         return embeddings
 
     @staticmethod
-    def create_level_corpus(embeddings, level):
+    def create_level_corpus(embeddings, level, curriculum, number_letter_lookup):
         # Creates the corpus for each level, as defined by the eligible letters per level.
         return []

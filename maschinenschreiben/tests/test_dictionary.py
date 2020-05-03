@@ -1,4 +1,5 @@
 import unittest
+import numpy as np
 from maschinenschreiben.dictionary import Dictionary
 
 
@@ -7,9 +8,9 @@ class TestDictionary(unittest.TestCase):
         self.dic = [
             'abcd',
             'affe',
-            'a0'
+            'b03'
         ]
-        self.curriculum = 'abcd01234'
+        self.curriculum = 'abcd0123'
         self.lookup = Dictionary.create_letter_embedding_lookup(self.curriculum)
         self.embeddings = Dictionary.create_embeddings(self.dic, self.curriculum, self.lookup)
 
@@ -28,6 +29,9 @@ class TestDictionary(unittest.TestCase):
 
     def test_create_embedding(self):
         self.assertEqual(self.embeddings.shape, (len(self.dic), len(self.curriculum)))
+        self.assertTrue((self.embeddings[0, :] == np.asarray([1, 1, 1, 1, 0, 0, 0, 0])).all())
+        self.assertTrue((self.embeddings[1, :] == np.asarray([1, 0, 0, 0, 0, 0, 0, 0])).all())
+        self.assertTrue((self.embeddings[2, :] == np.asarray([0, 1, 0, 0, 1, 0, 0, 1])).all())
         return True
 
     def test_create_level_corpus(self):
