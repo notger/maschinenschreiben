@@ -3,6 +3,20 @@ from maschinenschreiben.lecture_generation import Lecture
 
 
 class TestLectureGeneration(unittest.TestCase):
+    def setUp(self):
+        corpus = [
+            'Affe',
+            'Banane',
+            'Cholera',
+            'Diphthong'
+        ]
+        self.lecture = Lecture(corpus=corpus, length=20)
+
+    def test_lecture_generation(self):
+        lecture = self.lecture.create_lecture(self.lecture.corpus, self.lecture.length)
+        self.assertEqual(type(lecture), list)
+        self.assertEqual(len(lecture), self.lecture.length)
+
     def test_check_inclusion(self):
         # Word and curriculum are identical:
         #self.assertTrue(Lecture.check_inclusion('asdf', ''.join(sorted('asdf'))))

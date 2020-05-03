@@ -56,7 +56,7 @@ class TestDictionary(unittest.TestCase):
         start_time = time.time()
         corpus = dic.create_level_corpus(dic.dic, dic.embeddings, dic.eligible_letters_per_level[-1], dic.letter_embedding_lookup, verbose=True)
         print("Performance-test: Creating a full corpus took {:.1f} s for {} entries.".format(time.time() - start_time, len(corpus)))
-
+        
 
 if __name__ == '__main__':
     unittest.main()
