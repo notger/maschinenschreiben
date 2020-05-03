@@ -2,26 +2,29 @@
 # and a corpus of words. The level of the learner is defined by the letters allowed
 # for word generation ("bag of letters").
 
-def generate_lecture(level):
-    # Create real-word-lecture:
-    # (Check first, if we could actually pull a real text!)
 
+class Lecture(object):
+    def __init__(self, level):
+        self.level = level
 
-    # Spice it up with random stuff from underused letters:
+    def create_lecture(self, corpus, number_of_letters):
+        # Creates a lecture with a given number of letters.
 
+        # Pick a few words that are eligible.
 
-    return "asdf"
+        # Fill them up with random stuff, just to make sure we have covered everything.
 
+        return None
 
-def load_dictionary():
-    return ['asf']
+    def analyse_lecture_histogram(self, corpus):
+        # Analyses the distribution of keystrokes in a given lecture to see whether we have some
+        # underused ones.
+        return None
 
+    def generate_random_corpus(self, lecture, weights, number_of_letters):
+        # Generates random words from underused keys. 
+        return None
 
-def create_level_corpus():
-    # Creates the corpus for each level, as defined by the eligible letters per level.
-    return []
-
-
-def check_inclusion(word, curriculum):
-    # Checks whether the letters of a given dictionary-word are found in a bag of letters.
-    return ''.join(sorted(word)) in curriculum
+    def check_inclusion(self, word, curriculum):
+        # Checks whether the letters of a given dictionary-word are found in a bag of letters.
+        return ''.join(sorted(word)) in curriculum
