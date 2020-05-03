@@ -4,7 +4,7 @@ from maschinenschreiben.level_definition import curriculum
 
 class Dictionary(object):
     # Class to store all allowed words and their numerical embeddings.
-    def __init__(self, filename='german.dic'):
+    def __init__(self, filename='german.dic', verbose=True):
         self.dic = self.load_dictionary(filename)
 
         # Based on the curriculum above, we construct the dictionary which contains the letters eligible per level.
@@ -18,20 +18,24 @@ class Dictionary(object):
         ]
 
         # Create a letter to numbers and numbers to letters lookup for later use, e.g. embedding-conversion:
-        self.letter_embedding_lookup = self.create_letter_embedding_lookup(curriculum[-1])
+        self.letter_embedding_lookup = self.create_letter_embedding_lookup(self.eligible_letters_per_level[-1])
 
         # Create the one-hot-encoded representation, if it does not already exist:
         # Check for file existence, then load, otherwise generate and save.
-        #self.embeddings = self.create_embedding(self.dic, self.eligible_letters_per_level[-1])
+        self.embeddings = self.create_embeddings(self.dic, self.eligible_letters_per_level[-1], self.letter_embedding_lookup)
+        
+        if verbose:
+            print("Loaded dictionary with {} entries.".format(len(self.dic)))
+            print("After pruning the dictionary, {} entries remain.".format(self.embeddings.shape[0]))
 
     @staticmethod
     def load_dictionary(filename):
         # Load the dictionary. We can load the dictionary as a list of words, to be used
         # for later filtering and selection:
         with open(filename, 'r') as f:
-            # Load each line, but only take the part before the slash, if one exists.
+            # Load each line, but only take the part before the slash or return, if one exists.
             # Also ignore lines with a leading pound-symbol, as that might be a comment. ;)
-            dic = [line.split('/')[0] for line in f.readlines() if line[0] != '#']
+            dic = [line.split('/')[0].split('\n')[0] for line in f.readlines() if line[0] != '#']
 
         return dic
 
@@ -45,22 +49,41 @@ class Dictionary(object):
         return lookup
 
     @staticmethod
-    def create_embeddings(dic, set_of_letters, number_letter_lookup):
+    def create_embeddings(dic, set_of_letters, letter_embedding_lookup):
         # Create a second version of the dictionary with "embeddings". Each letter has one column
-        # in a one-hot-encoding-matrix of dim N x M, where N is the number of words in the original
-        # dictionary and M is the number of max allowed letters in the highest level:
-        embeddings = np.zeros((len(dic), len(set_of_letters)), dtype=int)
+        # in a one-hot-encoding-matrix of dim N x (M+1), where N is the number of words in the original
+        # dictionary and M+1 is the number of max allowed letters in the highest level plus one more
+        # for catching letters that are not in the set of letters, e.g. scandinavian or french ones:
+        embeddings = np.zeros((len(dic), len(set_of_letters) + 1), dtype=int)
+        catch_all_index = embeddings.shape[1] - 1
 
         for k, word in enumerate(dic):
             ordered_letters = sorted(list(set(word)))
             # Create the list of indices from the word. If the word contains letters not allowed,
-            # e.g. letters outside of the allowed alphabed, then discard it.
-            indices = [number_letter_lookup[a] for a in ordered_letters if number_letter_lookup.get(a, -1) >= 0]
+            # book them into the catch-all-column, which is the last one:
+            indices = [letter_embedding_lookup.get(a, catch_all_index) for a in ordered_letters]
             embeddings[k, indices] = 1
 
         return embeddings
 
     @staticmethod
-    def create_level_corpus(embeddings, level, curriculum, number_letter_lookup):
+    def create_level_corpus(dic, embeddings, set_of_letters, letter_embedding_lookup, verbose=False):
         # Creates the corpus for each level, as defined by the eligible letters per level.
-        return []
+        catch_all_index = embeddings.shape[1] - 1
+        indices_of_allowed_letters = [letter_embedding_lookup.get(a, catch_all_index) for a in set_of_letters]
+
+        # Now generate a mask over the embeddings E, such that when we multiply the mask 
+        # and the embeddings, all non-allowed letters stand out. The mask M will contain a 1 for
+        # each letter that is not allowed and a zero for allowed letters.
+        # Thus, (M x E)_ij = 1 if a letter in E shows up, that should not be allowed and 0 otherwise.
+        # So sum_i (M x E)_ij
+        mask = np.ones_like(embeddings, dtype=int)
+        mask[:, indices_of_allowed_letters] = 0
+        unallowed_letters_present = np.sum(mask * embeddings, axis = 1)
+        words_to_keep = np.where(unallowed_letters_present == 0)[0]
+        corpus = [dic[i] for i in words_to_keep]
+
+        if verbose:
+            print("Created a corpus with {} entries.".format(len(corpus)))
+    
+        return corpus

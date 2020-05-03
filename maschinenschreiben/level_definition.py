@@ -8,8 +8,9 @@ curriculum = [
     'ghtz',
     'cvnmb',
     'yx,.-',
-    'äü',
+    'äüß',
     '1234567890',
+    'éèáàôê'
 ]
 for k in range(len(curriculum)):
     curriculum[k] += curriculum[k].upper()

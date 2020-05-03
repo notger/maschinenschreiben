@@ -13,7 +13,7 @@ class TestLectureGeneration(unittest.TestCase):
         # The word contains a character, that is not in the curriculum:
         #self.assertFalse(Lecture.check_inclusion('asdf', ''.join(sorted('asd_qweurip'))))
         return None
-        
+
 
 if __name__ == '__main__':
     unittest.main()
