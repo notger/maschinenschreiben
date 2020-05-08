@@ -1,6 +1,7 @@
 # Defines methods to generate a specific lecture, given the level of the learner
 # and a corpus of words. The level of the learner is defined by the letters allowed
 # for word generation ("bag of letters").
+import random
 import numpy as np
 from collections import Counter
 
@@ -39,9 +40,8 @@ class Lecture(object):
             word_length=5
         )
 
-        # Now jumble them around randomly:
-        # todo
-
+        # Now jumble them around randomly and return them:
+        random.shuffle(lecture)
         return lecture
 
     @staticmethod
