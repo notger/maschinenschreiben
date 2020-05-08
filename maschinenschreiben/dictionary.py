@@ -4,18 +4,28 @@ from maschinenschreiben.level_definition import curriculum
 
 class Dictionary(object):
     # Class to store all allowed words and their numerical embeddings.
-    def __init__(self, filename='german.dic', verbose=True):
-        self.dic = self.load_dictionary(filename)
+    # If you specify a filename to load, then this will be used.
+    # Otherwise, you have to specify the seed in the following form:
+    # seed = {
+    #     'curriculum' = curriculum
+    #     'dic' = a list of words
+    # }
+    def __init__(self, filename='german.dic', seed=None, verbose=True):
+        if filename is not None:
+            self.dic = self.load_dictionary(filename)
 
-        # Based on the curriculum above, we construct the dictionary which contains the letters eligible per level.
-        # Important: This list has to be sorted!
-        self.eligible_letters_per_level = [
-            ''.join(
-                sorted(set(''.join(
-                    curriculum[0:k + 1])
-                ))
-            ) for k in range(len(curriculum))
-        ]
+            # Based on the curriculum above, we construct the dictionary which contains the letters eligible per level.
+            # Important: This list has to be sorted!
+            self.eligible_letters_per_level = [
+                ''.join(
+                    sorted(set(''.join(
+                        curriculum[0:k + 1])
+                    ))
+                ) for k in range(len(curriculum))
+            ]
+        else:
+            self.dic = seed.get('dic', None)
+            self.eligible_letters_per_level = seed.get('curriculum', None)
 
         # Create a letter to numbers and numbers to letters lookup for later use, e.g. embedding-conversion:
         self.letter_embedding_lookup = self.create_letter_embedding_lookup(self.eligible_letters_per_level[-1])
@@ -66,22 +76,21 @@ class Dictionary(object):
 
         return embeddings
 
-    @staticmethod
-    def create_level_corpus(dic, embeddings, set_of_letters, letter_embedding_lookup, verbose=False):
+    def create_level_corpus(self, level, verbose=False):
         # Creates the corpus for each level, as defined by the eligible letters per level.
-        catch_all_index = embeddings.shape[1] - 1
-        indices_of_allowed_letters = [letter_embedding_lookup.get(a, catch_all_index) for a in set_of_letters]
+        catch_all_index = self.embeddings.shape[1] - 1
+        indices_of_allowed_letters = [self.letter_embedding_lookup.get(a, catch_all_index) for a in self.eligible_letters_per_level[level]]
 
         # Now generate a mask over the embeddings E, such that when we multiply the mask 
         # and the embeddings, all non-allowed letters stand out. The mask M will contain a 1 for
         # each letter that is not allowed and a zero for allowed letters.
         # Thus, (M x E)_ij = 1 if a letter in E shows up, that should not be allowed and 0 otherwise.
         # So sum_i (M x E)_ij
-        mask = np.ones_like(embeddings, dtype=int)
+        mask = np.ones_like(self.embeddings, dtype=int)
         mask[:, indices_of_allowed_letters] = 0
-        unallowed_letters_present = np.sum(mask * embeddings, axis = 1)
+        unallowed_letters_present = np.sum(mask * self.embeddings, axis = 1)
         words_to_keep = np.where(unallowed_letters_present == 0)[0]
-        corpus = [dic[i] for i in words_to_keep]
+        corpus = [self.dic[i] for i in words_to_keep]
 
         if verbose:
             print("Created a corpus with {} entries.".format(len(corpus)))
