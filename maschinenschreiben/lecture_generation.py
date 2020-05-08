@@ -20,7 +20,7 @@ class Lecture(object):
         )
 
     def create_lecture(self, corpus, length, random_proportion=0.1):
-        # Creates a lecture with a given number of letters.
+        # Creates a lecture with a given number of words.
         N_regular = int((1 - random_proportion) * length)
         indices = list(range(len(corpus)))
         chosen_indices = np.random.choice(indices, N_regular).tolist()
@@ -31,7 +31,7 @@ class Lecture(object):
 
         # Fill them up with random stuff, just to make sure we have covered everything.
         N_random = length - N_regular
-        lecture += self.generate_random_corpus(
+        lecture += self.generate_random_lecture(
             number_of_words=N_random, 
             histogram=self.analyse_lecture_histogram(
                 lecture, bag_of_letters=self.bag_of_letters
@@ -40,6 +40,7 @@ class Lecture(object):
         )
 
         # Now jumble them around randomly:
+        # todo
 
         return lecture
 
@@ -67,13 +68,28 @@ class Lecture(object):
         return ctr
 
     @staticmethod
-    def generate_random_corpus(number_of_words=None, histogram=None, word_length=None):
+    def generate_random_lecture(number_of_words=None, histogram=None, word_length=None):
         # Generates random words from underused keys.
+        
+        # Extract the weights from the histogram.
+        # (In case you are wondering: We are not using bag_of_letters here as the histogram might have
+        # its own ordering and we obviously need the correct ordering between letters and their probability.)
+        letters = list(histogram.keys())
+        weights = np.asarray(list(histogram.values()))
+
+        # The weights at that point indicate the frequency of the letter in the lecture.
+        # As we want to favour the less-presented letters, we will make the probability
+        # of showing up proportional to 1 - weight:
+        letter_likelihood = 1 - weights
+        letter_likelihood /= np.sum(letter_likelihood)
+
+        # Now we can create the random words:
         random_corpus = [] 
         for k in range(number_of_words):
-            random_corpus.append('asfd')
-        return random_corpus
+            random_corpus.append(
+                ''.join(
+                    np.random.choice(letters, size=word_length, p=letter_likelihood)
+                )
+            )
 
-    # def check_inclusion(self, word, curriculum):
-    #     # Checks whether the letters of a given dictionary-word are found in a bag of letters.
-    #     return ''.join(sorted(word)) in curriculum
+        return random_corpus
