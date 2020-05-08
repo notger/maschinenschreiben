@@ -2,15 +2,21 @@
 # and a corpus of words. The level of the learner is defined by the letters allowed
 # for word generation ("bag of letters").
 import numpy as np
+from collections import Counter
 
 
 class Lecture(object):
-    def __init__(self, dic, level, length=20):
-        self.length = length
+    def __init__(self, dic, level, length=20, verbose=False):
         self.dic = dic
+        self.level= level
+        self.length = length
+
+        # For internal use and easier legibility:
         self.bag_of_letters = self.dic.eligible_letters_per_level[level]
+
+        # Create the corpus for this level:
         self.corpus = dic.create_level_corpus(
-            dic.dic, dic.embeddings, self.bag_of_letters, dic.letter_embedding_lookup, verbose=True
+            level=level, verbose=verbose
         )
 
     def create_lecture(self, corpus, length, random_proportion=0.1):
@@ -25,20 +31,43 @@ class Lecture(object):
 
         # Fill them up with random stuff, just to make sure we have covered everything.
         N_random = length - N_regular
-        lecture += self.generate_random_corpus(N_random, [], 5)
+        lecture += self.generate_random_corpus(
+            number_of_words=N_random, 
+            histogram=self.analyse_lecture_histogram(
+                lecture, bag_of_letters=self.bag_of_letters
+            ), 
+            word_length=5
+        )
 
         # Now jumble them around randomly:
 
         return lecture
 
     @staticmethod
-    def analyse_lecture_histogram(corpus):
+    def analyse_lecture_histogram(lecture=None, bag_of_letters=None):
         # Analyses the distribution of keystrokes in a given lecture to see whether we have some
         # underused ones.
-        return None
+        # Returns a dictionary containing all letters in bag_of_letters and their probability.
+
+        # First, collect all letters and put them in a dictionary:
+        all_letters = [a for a in ''.join(lecture)]
+
+        # Count them:
+        ctr = Counter(all_letters)
+
+        # Manipulate the values to be probabilities:
+        for key, value in ctr.items():
+            ctr[key] = value / len(all_letters)
+
+        # Add letters that did not show up in the lecture:
+        for letter in bag_of_letters:
+            if letter not in ctr.keys():
+                ctr[letter] = 0.0
+
+        return ctr
 
     @staticmethod
-    def generate_random_corpus(number_of_words, weights, word_length):
+    def generate_random_corpus(number_of_words=None, histogram=None, word_length=None):
         # Generates random words from underused keys.
         random_corpus = [] 
         for k in range(number_of_words):
