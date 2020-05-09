@@ -15,12 +15,15 @@ class UserStats(object):
         except FileNotFoundError:
             return pd.DataFrame(columns=self.field_list)
 
+    def save_user_stats(self):
+        self.stats.to_csv(self.filename)
+
     @staticmethod
     def get_last_state(stats=None, username=None):
         tmp = stats.query('name == "{}"'.format(username))
         if len(tmp) > 0:
             # Fun fact: This is ugly. If you use to_dict, normally it would give you the row-index
-            # in the output: key: (row_index, value). So you have to use the switch 'r' to give
+            # in the output: key: {row_index, value}. So you have to use the switch 'r' to give
             # row-wise output, but that will convert the output of to_dict to a list, so we have
             # to take the first element of that list. Bah.
             return tmp.tail(1).to_dict('r')[0]
