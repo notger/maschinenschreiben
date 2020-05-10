@@ -27,6 +27,8 @@ class Dictionary(object):
             self.dic = seed.get('dic', None)
             self.eligible_letters_per_level = seed.get('curriculum', None)
 
+        self.max_level = len(self.eligible_letters_per_level) - 1
+
         # Create a letter to numbers and numbers to letters lookup for later use, e.g. embedding-conversion:
         self.letter_embedding_lookup = self.create_letter_embedding_lookup(self.eligible_letters_per_level[-1])
 

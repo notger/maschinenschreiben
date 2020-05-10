@@ -1,5 +1,6 @@
 import time
 import datetime
+import numpy as np
 
 from maschinenschreiben.lecture_generation import Lecture
 from maschinenschreiben.dictionary import Dictionary
@@ -52,7 +53,7 @@ class UserInterface(object):
         else:
             print("Für einen neuen Nutzer empfehlen wir Level 0.")
         
-        self.level = int(input('Gewünschtes Level: '))
+        self.level = np.clip(int(input('Gewünschtes Level: ')), 0, self.dic.max_level, dtype=int)
         self.lecture = Lecture(dic=self.dic, level=self.level)
 
     def lecture_loop(self):
@@ -60,9 +61,11 @@ class UserInterface(object):
         while wants_lecture:
             print()
             print('Bitte tippe folgende Worte möglichst genau und möglichst schnell ab:')
+            print()
             lecture = ' '.join(self.lecture.create_lecture())
             print(lecture)
             start_time = time.time()
+            print()
             students_answer = input()
             time_elapsed = time.time() - start_time
 
@@ -72,8 +75,8 @@ class UserInterface(object):
             print('Du hast die Lektion in {:.0f} Sekunden abgeschlossen und dabei eine Korrektheit von {:.1f} (0-100) erreicht.'.format(time_elapsed, correctness))
             print('Deine Gesamtpunktzahl beträgt damit {:.0f} (0 - 100).'.format(score))
 
-            # If the score is high enough, recommend a higher level:
-            if score >= 80:
+            # If the score is high enough and we are not yet at max_level, recommend a higher level:
+            if score >= 80 and self.level < self.dic.max_level:
                 print()
                 self.level += int('j' in input('Deine Punktzahl ist hoch genug, um ein Level aufzusteigen. Möchtest du das? (j/n) '))
                 self.lecture = Lecture(dic=self.dic, level=self.level)
