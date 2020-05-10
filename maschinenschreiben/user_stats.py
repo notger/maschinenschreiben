@@ -11,7 +11,7 @@ class UserStats(object):
         # Load the user stats file. If it does not exist, then create a user stats model.
         # For fun and giggles, we are doing this according to "ask for forgiveness, not permission":
         try:
-            return pd.read_csv(self.filename)
+            return pd.read_csv(self.filename, usecols=self.field_list)
         except FileNotFoundError:
             return pd.DataFrame(columns=self.field_list)
 
@@ -29,3 +29,22 @@ class UserStats(object):
             return tmp.tail(1).to_dict('r')[0]
         else:
             return None
+
+    def add_and_save_stats(self, name='', datetime=0, level=0, time=0, correctness=0, score=0):
+        self.stats = self.stats.append(
+            pd.DataFrame.from_dict(
+                {
+                    'name': [name],
+                    'datetime': [datetime],
+                    'level': [level],
+                    'time': [time],
+                    'correctness': [correctness],
+                    'score': [score],
+                }
+            ),
+            ignore_index=True,
+        )
+        self.stats.to_csv(self.filename)
+
+    def get_usernames(self):
+        return self.stats.name.unique().tolist()

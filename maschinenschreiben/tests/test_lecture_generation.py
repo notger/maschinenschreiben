@@ -31,7 +31,7 @@ class TestLectureGeneration(unittest.TestCase):
         )
 
     def test_lecture_generation(self):
-        lecture = self.lecture.create_lecture(self.lecture.corpus, self.lecture.length)
+        lecture = self.lecture.create_lecture()
         self.assertEqual(type(lecture), list)
         self.assertEqual(len(lecture), self.lecture.length)
 

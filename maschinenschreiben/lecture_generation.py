@@ -3,6 +3,7 @@
 # for word generation ("bag of letters").
 import random
 import numpy as np
+import Levenshtein as lev
 from collections import Counter
 
 
@@ -20,18 +21,18 @@ class Lecture(object):
             level=level, verbose=verbose
         )
 
-    def create_lecture(self, corpus, length, random_proportion=0.1):
+    def create_lecture(self, random_proportion=0.1):
         # Creates a lecture with a given number of words.
-        N_regular = int((1 - random_proportion) * length)
-        indices = list(range(len(corpus)))
+        N_regular = int((1 - random_proportion) * self.length)
+        indices = list(range(len(self.corpus)))
         chosen_indices = np.random.choice(indices, N_regular).tolist()
         np.random.shuffle(chosen_indices)
 
         # Pick a few words that are eligible.
-        lecture = [corpus[k] for k in chosen_indices]
+        lecture = [self.corpus[k] for k in chosen_indices]
 
         # Fill them up with random stuff, just to make sure we have covered everything.
-        N_random = length - N_regular
+        N_random = self.length - N_regular
         lecture += self.generate_random_lecture(
             number_of_words=N_random, 
             histogram=self.analyse_lecture_histogram(
@@ -93,3 +94,11 @@ class Lecture(object):
             )
 
         return random_corpus
+
+    @staticmethod
+    def score_lecture(lecture, answer, time_elapsed, expected_typing_speed=100):
+        correctness = 100 * (1.0 - lev.distance(lecture, answer) / len(lecture))
+        expected_time = len(lecture) / expected_typing_speed
+        time_score = 100 * min(1.0, expected_typing_speed / time_elapsed)
+        score = 0.5 * (time_score + correctness)
+        return correctness, time_elapsed, score

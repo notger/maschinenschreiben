@@ -1,8 +1,13 @@
-from maschinenschreiben.user_stats import UserStats
+from maschinenschreiben.ui import UserInterface
 
 
 if __name__ == '__main__':
-    # At the start, load the user stats file:
-    user_stats = UserStats()
+    # Set up the UI:
+    ui = UserInterface()
 
-    print("test")
+    # Display a menu:
+    ui.welcome_message()
+    ui.choose_level()
+
+    # Start the lecture-loop:
+    ui.lecture_loop()
