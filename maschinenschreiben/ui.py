@@ -46,14 +46,14 @@ class UserInterface(object):
         print()
         if self.username in self.user_stats.stats.name.unique():
             last_state = self.user_stats.get_last_state(stats=self.user_stats.stats, username=self.username)
-            print("Dein letztes Übungslevel war {}, mit einem Score von {:.1f} (0 - 100).".format(
-                last_state['level'], last_state['score']
+            print("Dein letztes Übungslevel war {} (0-{}), mit einem Score von {:.1f} (0 - 100).".format(
+                last_state['level'], self.dic.max_level, last_state['score']
             ))
         
         else:
             print("Für einen neuen Nutzer empfehlen wir Level 0.")
         
-        self.level = np.clip(int(input('Gewünschtes Level: ')), 0, self.dic.max_level, dtype=int)
+        self.level = np.clip(int(input('Gewünschtes Level (0-{}): ').format(self.dic.max_level)), 0, self.dic.max_level, dtype=int)
         self.lecture = Lecture(dic=self.dic, level=self.level)
 
     def lecture_loop(self):
@@ -78,7 +78,7 @@ class UserInterface(object):
             # If the score is high enough and we are not yet at max_level, recommend a higher level:
             if score >= 80 and self.level < self.dic.max_level:
                 print()
-                self.level += int('j' in input('Deine Punktzahl ist hoch genug, um ein Level aufzusteigen. Möchtest du das? (j/n) '))
+                self.level += int('j' in input('Deine Punktzahl ist hoch genug, um ein Level von {} auf {} aufzusteigen. Möchtest du das? (j/n) '.format(self.level, self.dic.max_level)))
                 self.lecture = Lecture(dic=self.dic, level=self.level)
 
             # Store the lecture and the scores and save the user-stats:
