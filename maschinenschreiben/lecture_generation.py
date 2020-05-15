@@ -99,6 +99,6 @@ class Lecture(object):
     def score_lecture(lecture, answer, time_elapsed, expected_typing_speed=100):
         correctness = 100 * (1.0 - lev.distance(lecture, answer) / len(lecture))
         expected_time = len(lecture) / expected_typing_speed
-        time_score = 100 * min(1.0, expected_typing_speed / time_elapsed)
+        time_score = 100 * min(1.0, expected_time / time_elapsed)
         score = 0.5 * (time_score + correctness)
         return correctness, time_elapsed, score

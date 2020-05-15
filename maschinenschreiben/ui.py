@@ -78,7 +78,7 @@ class UserInterface(object):
             # If the score is high enough and we are not yet at max_level, recommend a higher level:
             if score >= 80 and self.level < self.dic.max_level:
                 print()
-                self.level += int('j' in input('Deine Punktzahl ist hoch genug, um ein Level von {} auf {} aufzusteigen. Möchtest du das? (j/n) '.format(self.level, self.dic.max_level)))
+                self.level += int('j' in input('Deine Punktzahl ist hoch genug, um ein Level von {} auf {} aufzusteigen. Möchtest du das? (j/n) '.format(self.level, self.level + 1)))
                 self.lecture = Lecture(dic=self.dic, level=self.level)
 
             # Store the lecture and the scores and save the user-stats:
