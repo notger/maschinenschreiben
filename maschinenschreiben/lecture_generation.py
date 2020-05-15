@@ -96,7 +96,8 @@ class Lecture(object):
         return random_corpus
 
     @staticmethod
-    def score_lecture(lecture, answer, time_elapsed, expected_typing_speed=100):
+    def score_lecture(lecture, answer, time_elapsed, expected_typing_speed=1.5):
+        '''Score the lecture. Expected typing speed is keys per second.'''
         correctness = 100 * (1.0 - lev.distance(lecture, answer) / len(lecture))
         expected_time = len(lecture) / expected_typing_speed
         time_score = 100 * min(1.0, expected_time / time_elapsed)

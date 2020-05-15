@@ -72,12 +72,6 @@ class UserInterface(object):
             print('Du hast die Lektion in {:.0f} Sekunden abgeschlossen und dabei eine Korrektheit von {:.1f} (0-100) erreicht.'.format(time_elapsed, correctness))
             print('Deine Gesamtpunktzahl beträgt damit {:.0f} (0 - 100).'.format(score))
 
-            # If the score is high enough and we are not yet at max_level, recommend a higher level:
-            if score >= 80 and self.level < self.dic.max_level:
-                print()
-                self.level += int('j' in input('Deine Punktzahl ist hoch genug, um ein Level von {} auf {} aufzusteigen. Möchtest du das? (j/n) '.format(self.level, self.level + 1)))
-                self.lecture = Lecture(dic=self.dic, level=self.level)
-
             # Store the lecture and the scores and save the user-stats:
             self.user_stats.add_and_save_stats(
                 name=self.username,
@@ -87,6 +81,12 @@ class UserInterface(object):
                 correctness=correctness,
                 score=score,
             )
+
+            # If the score is high enough and we are not yet at max_level, recommend a higher level:
+            if score >= 80 and self.level < self.dic.max_level:
+                print()
+                self.level += int('j' in input('Deine Punktzahl ist hoch genug, um ein Level von {} auf {} aufzusteigen. Möchtest du das? (j/n) '.format(self.level, self.level + 1)))
+                self.lecture = Lecture(dic=self.dic, level=self.level)
 
             print()
             wants_lecture = 'n' not in input("Noch eine Lektion? (j/n): ")
