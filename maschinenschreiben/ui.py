@@ -24,9 +24,6 @@ class UserInterface(object):
 
             name_lookup = {str(k): name for k, name in enumerate(self.user_stats.get_usernames())}
 
-            print(name_lookup)
-            print(type(name_lookup))
-
             for k, name in name_lookup.items():
                 print('{} - {}'.format(k, name))
             print()
